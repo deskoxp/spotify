@@ -53,7 +53,7 @@
             <div class="instructions">
                 <p><strong data-i18n="instructionsTitle">Instrucciones para OBS:</strong></p>
                 <ol>
-                    <li data-i18n="instruction1">2. Activa 'Fondo Verde' en ajustes</li>
+                    <li data-i18n="instruction1">2. Activa 'Fundo Verde' nas configuraçoes</li>
                     <li data-i18n="instruction2">3. En OBS: Fuente Captura de Ventana</li>
                     <li data-i18n="instruction3">4. En OBS: Filtro 'Fondo Chroma'</li>
                 </ol>
@@ -64,7 +64,7 @@
     <!-- Pantalla de Letras -->
     <div id="lyrics-screen" class="screen">
         <div class="lyrics-container">
-            <!-- Header con info de la canción (Estructura Modular) -->
+            <!-- Header con info de la canción (Modular) -->
             <div class="song-player-container">
                 <!-- Bloque Izquierdo: Carátula -->
                 <div class="player-left">
@@ -104,11 +104,11 @@
             <!-- Contenedor de letras -->
             <div class="lyrics-wrapper">
                 <div id="lyrics-content" class="lyrics-content">
-                    <!-- Vacío por defecto para que no estorbe -->
+                    <!-- Vacío por defecto -->
                 </div>
             </div>
 
-            <!-- Controles Flotantes con Texto -->
+            <!-- Controles Flotantes -->
             <div class="controls">
                 <button id="toggle-bg" class="control-btn text-btn" data-i18n="btnToggleBg">Fondo Verde</button>
                 <button id="settings-btn" class="control-btn text-btn" data-i18n="btnSettings">Ajustes</button>
@@ -137,12 +137,20 @@
             </div>
 
             <div class="setting-group">
-                <label data-i18n="playerStyle">Estilo de reproductor:</label>
+                <label data-i18n="playerStyle">Diseño:</label>
                 <select id="player-style" class="language-select">
-                    <option value="custom" data-i18n="playerStyleCustom">Diseño Personalizado (Sleep Token)</option>
-                    <option value="normal" data-i18n="playerStyleNormal">Grande (Normal)</option>
-                    <option value="compact" data-i18n="playerStyleCompact">Compacto</option>
-                    <option value="hidden" data-i18n="playerStyleHidden">Oculto (Solo letras)</option>
+                    <option value="custom" data-i18n="playerStyleCustom">Reproductor (Sleep Token)</option>
+                    <option value="hidden" data-i18n="playerStyleHidden">Solo Letra</option>
+                </select>
+            </div>
+
+            <!-- NUEVO: Alineación Reproductor -->
+            <div class="setting-group">
+                <label data-i18n="playerAlign">Alineación Reproductor:</label>
+                <select id="player-align" class="language-select">
+                    <option value="center" data-i18n="alignCenter">Centro</option>
+                    <option value="left" data-i18n="alignLeft">Izquierda</option>
+                    <option value="right" data-i18n="alignRight">Derecha</option>
                 </select>
             </div>
 
@@ -180,8 +188,8 @@
 
             <div class="setting-group">
                 <label data-i18n="fontSize">Tamaño de letra:</label>
-                <input type="range" id="font-size" min="16" max="64" value="28" step="2">
-                <span id="font-size-value">28px</span>
+                <input type="range" id="font-size" min="16" max="96" value="48" step="2">
+                <span id="font-size-value">48px</span>
             </div>
             <div class="setting-group" id="visible-lines-group">
                 <label data-i18n="visibleLines">Líneas visibles:</label>

@@ -7,8 +7,28 @@
     --chroma-key: #00b140;
     --accent-color: #e91429;
 
-    --shadow-text: 0 2px 10px rgba(0, 0, 0, 0.8);
-    --shadow-glow: 0 0 40px rgba(255, 255, 255, 0.2);
+    /* Variables de Tema Dinámicas */
+    --bg-color: #121212;
+    --box-bg: #101010;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A0A0A0;
+
+    --lyric-font-size: 28px;
+    --lyric-font-size-single: 56px;
+}
+
+/* Modo Claro */
+body.light-mode {
+    --bg-color: #e8e8e8;
+    --box-bg: #ffffff;
+    --text-primary: #000000;
+    --text-secondary: #666666;
+}
+
+/* Fondo Chroma Key */
+body.chroma-mode {
+    background-color: var(--chroma-key) !important;
+    background-image: none !important;
 }
 
 * {
@@ -19,16 +39,10 @@
 
 body {
     font-family: 'Poppins', BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: var(--spotify-dark);
-    color: var(--text-white);
+    background: var(--bg-color);
+    color: var(--text-primary);
     overflow: hidden;
     min-height: 100vh;
-}
-
-/* Fondo Chroma Key */
-body.chroma-mode {
-    background-color: var(--chroma-key) !important;
-    background-image: none !important;
 }
 
 /* Screens */
@@ -86,13 +100,6 @@ body.chroma-mode {
     transform: translateY(-2px);
 }
 
-.spotify-icon {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 1rem;
-    color: var(--spotify-green);
-}
-
 /* ===== LYRICS SCREEN ===== */
 #lyrics-screen {
     background: transparent;
@@ -106,19 +113,51 @@ body.chroma-mode {
     height: 100%;
     display: flex;
     flex-direction: column;
+    /* La alineación horizontal se maneja con clases */
     align-items: center;
 }
 
-/* PLAYER LAYOUT (SIMÉTRICO) */
+/* PLAYER LAYOUT */
 .song-player-container {
     display: flex;
     align-items: flex-start;
-    /* Alineación superior inicial */
     gap: 1.5rem;
     margin-bottom: 2rem;
     position: relative;
     padding-bottom: 15px;
+    width: 100%;
+    /* Ocupar ancho para poder alinearse */
+    max-width: 800px;
+    /* Ancho máximo del diseño */
 }
+
+/* Alineación del Reproductor */
+body.player-align-left .song-player-container {
+    margin-right: auto;
+    margin-left: 0;
+}
+
+body.player-align-center .song-player-container {
+    margin: 0 auto 2rem auto;
+}
+
+body.player-align-right .song-player-container {
+    margin-left: auto;
+    margin-right: 0;
+    flex-direction: row-reverse;
+}
+
+/* En alineación derecha, invertir también el orden visual interno si se desea, 
+   o mantenerlo.  flex-direction: row-reverse arriba lo logra. 
+   Tambien alinear texto a derecha en info box */
+body.player-align-right .info-box {
+    text-align: right;
+}
+
+body.player-align-right .player-right {
+    align-items: flex-end;
+}
+
 
 /* Bloque Izquierdo: Carátula */
 .player-left {
@@ -156,33 +195,40 @@ body.chroma-mode {
     opacity: 0.6;
 }
 
-/* Bloque Derecho: Info + Controles (Misma Altura que Carátula) */
+/* Bloque Derecho */
 .player-right {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    /* Clave: Info arriba, Controles abajo */
     height: 180px;
-    /* Clave: Misma altura que la imagen */
     min-width: 350px;
+    flex: 1;
 }
 
 .info-box,
 .controls-box {
-    background: #101010;
+    background: var(--box-bg);
+    /* Uso de variable */
     border-radius: 12px;
     padding: 1rem 1.5rem;
     width: 100%;
+    transition: background 0.3s ease;
 }
+
+/* Sombra extra en modo claro para que destaque del fondo blanco */
+body.light-mode .info-box,
+body.light-mode .controls-box {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
 
 .info-box {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /* height flexible */
     flex-grow: 1;
     margin-bottom: 10px;
-    /* Separación pequeña */
     max-height: 100px;
 }
 
@@ -194,10 +240,11 @@ body.chroma-mode {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text-primary);
 }
 
 #artist-name {
-    color: #888;
+    color: var(--text-secondary);
     font-size: 1rem;
     font-weight: 500;
     margin: 0;
@@ -208,11 +255,11 @@ body.chroma-mode {
     align-items: center;
     justify-content: space-between;
     height: 60px;
-    /* Altura fija para la barra inferior */
     font-family: 'Poppins', monospace;
     font-weight: 700;
     font-size: 1.1rem;
     flex-shrink: 0;
+    color: var(--text-primary);
 }
 
 /* Waveform */
@@ -223,6 +270,7 @@ body.chroma-mode {
     height: 24px;
     flex: 1;
     justify-content: center;
+    /* Siempre centrado respecto a la caja */
     margin: 0 1.5rem;
 }
 
@@ -266,7 +314,7 @@ body.chroma-mode {
     }
 }
 
-/* Barra de Progreso Inferior */
+/* Barra Inferior */
 .bottom-progress-bar {
     position: absolute;
     bottom: 0;
@@ -287,34 +335,30 @@ body.chroma-mode {
     transition: width 1s linear;
 }
 
-/* LYRICS ALIGNMENT & STYLE */
+/* LYRICS ALIGNMENT */
 .lyrics-content {
     width: 100%;
     margin-top: 1rem;
-    /* Default center */
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-/* Clases de alineación (aplicadas al body) */
+/* Clases de alineación de LETRAS (aplicadas al body) */
 body.align-left .lyrics-content {
     text-align: left;
     align-items: flex-start;
+    /* Crucial para single line */
 }
 
 body.align-right .lyrics-content {
     text-align: right;
     align-items: flex-end;
+    /* Crucial para single line */
 }
 
-body.align-center .lyrics-content {
-    text-align: center;
-    align-items: center;
-}
-
-/* Single Line Mode */
+/* Modo Single Line */
 body.lyrics-single .lyrics-content {
     overflow: visible;
 }
@@ -325,29 +369,41 @@ body.lyrics-single .lyric-line {
 
 body.lyrics-single .lyric-line.active {
     display: block;
-    font-size: 56px !important;
+    font-size: var(--lyric-font-size-single) !important;
+    /* Dinámico */
     font-weight: 900;
     padding: 0;
     margin: 0;
-    text-shadow: 2px 2px 0px #000;
+
+    /* Borde duro para legibilidad en modo claro/oscuro */
+    text-shadow:
+        -1px -1px 0 var(--bg-color),
+        1px -1px 0 var(--bg-color),
+        -1px 1px 0 var(--bg-color),
+        1px 1px 0 var(--bg-color);
+
     line-height: 1.1;
+    color: var(--text-primary);
 }
 
-/* List Mode */
+/* Modo List */
 .lyric-line {
-    font-size: 28px;
-    color: rgba(255, 255, 255, 0.4);
+    font-size: var(--lyric-font-size);
+    /* Dinámico */
+    color: var(--text-secondary);
     margin: 0.5rem 0;
     transition: all 0.3s ease;
+    opacity: 0.5;
 }
 
 .lyric-line.active {
-    color: white;
-    font-size: 32px;
+    color: var(--text-primary);
+    font-size: calc(var(--lyric-font-size) + 4px);
     font-weight: 700;
+    opacity: 1;
 }
 
-/* CONTROLS (Botones inferiores) */
+/* CONTROLS */
 .controls {
     position: fixed;
     bottom: 20px;
@@ -355,12 +411,10 @@ body.lyrics-single .lyric-line.active {
     display: flex;
     gap: 10px;
     z-index: 9999;
-    /* Z-Index alto para verlos siempre */
 }
 
 .control-btn {
     background: rgba(0, 0, 0, 0.6);
-    /* Fondo oscuro semitransparente */
     color: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 8px 16px;
@@ -378,24 +432,17 @@ body.lyrics-single .lyric-line.active {
     transform: translateY(-2px);
 }
 
-/* SETTINGS PANEL (Abajo a la derecha) */
+/* SETTINGS PANEL */
 .settings-panel {
     background: #121212;
     border: 1px solid #333;
     padding: 2rem;
     position: fixed;
     bottom: 80px;
-    /* Encima de los botones */
     right: 20px;
-    /* Pegado a la derecha */
-    transform: none;
-    /* Quitar centrado */
-    top: auto;
-    left: auto;
     border-radius: 12px;
     display: none;
     z-index: 10000;
-    /* Super alto */
     min-width: 300px;
     max-height: 80vh;
     overflow-y: auto;
@@ -426,11 +473,12 @@ input[type="color"] {
     border-radius: 6px;
 }
 
-/* Estilos Legacy Hidden */
+/* Ocultar elementos si no es custom */
 body:not(.player-custom) .song-player-container {
     display: none !important;
 }
 
-body.player-custom .song-info {
-    display: none;
+/* Ocultar Solo Letras */
+body.player-hidden .song-player-container {
+    display: none !important;
 }

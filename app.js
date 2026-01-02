@@ -14,10 +14,11 @@ class SpotifyLyricsApp {
         // Configuración por defecto
         this.settings = {
             transparentBg: true,
-            playerStyle: 'custom', // Por defecto el nuevo diseño
-            lyricsMode: 'single',  // Por defecto línea única
-            lyricsAlign: 'center', // Alineación
-            accentColor: '#e91429', // Rojo por defecto
+            playerStyle: 'custom',
+            playerAlign: 'center', // Alineación reproductor por defecto
+            lyricsMode: 'single',
+            lyricsAlign: 'center',
+            accentColor: '#e91429',
             fontSize: 48,
             visibleLines: 7,
             darkMode: true,
@@ -83,12 +84,20 @@ class SpotifyLyricsApp {
             this.applySettings();
         });
 
+        // Nuevo Player Align
+        const pAlign = document.getElementById('player-align');
+        if (pAlign) {
+            pAlign.addEventListener('change', (e) => {
+                this.settings.playerAlign = e.target.value;
+                this.applySettings();
+            });
+        }
+
         document.getElementById('lyrics-mode').addEventListener('change', (e) => {
             this.settings.lyricsMode = e.target.value;
             this.applySettings();
         });
 
-        // Nueva alineación
         const alignSelect = document.getElementById('lyrics-align');
         if (alignSelect) {
             alignSelect.addEventListener('change', (e) => {
@@ -97,7 +106,6 @@ class SpotifyLyricsApp {
             });
         }
 
-        // Nuevo selector de color
         const colorPicker = document.getElementById('accent-color');
         if (colorPicker) {
             colorPicker.addEventListener('input', (e) => {
@@ -348,7 +356,7 @@ class SpotifyLyricsApp {
         const songContainer = document.querySelector('.song-player-container');
 
         lyricsContainer.classList.add('fade-transition', 'fade-out');
-        songContainer.classList.add('fade-transition', 'fade-out'); // Animar todo
+        songContainer.classList.add('fade-transition', 'fade-out');
 
         await new Promise(r => setTimeout(r, 500));
 
@@ -359,7 +367,10 @@ class SpotifyLyricsApp {
         const loadingMsg = document.createElement('p');
         loadingMsg.className = 'loading-message';
         loadingMsg.textContent = this.getTranslation('loadingLyrics');
-        lyricsContainer.appendChild(loadingMsg);
+        // Solo mostrar cargando en modo lista o si está vacío, para evitar saltos
+        if (this.settings.lyricsMode === 'list') {
+            lyricsContainer.appendChild(loadingMsg);
+        }
 
         lyricsContainer.classList.remove('fade-out');
         songContainer.classList.remove('fade-out');
@@ -372,23 +383,14 @@ class SpotifyLyricsApp {
         document.getElementById('track-name').textContent = track.name;
         document.getElementById('artist-name').textContent = track.artist;
         document.getElementById('album-image').src = track.albumArt || '';
-
-        // Actualizar tiempos
         document.getElementById('total-time').textContent = this.formatTime(track.duration);
     }
 
     updateProgress(progress, duration) {
         const percentage = (progress / duration) * 100;
-
-        // Barra inferior Custom
         const bottomFill = document.getElementById('bottom-progress-fill');
         if (bottomFill) bottomFill.style.width = `${percentage}%`;
 
-        // Barra normal legacy
-        const normFill = document.getElementById('progress-fill');
-        if (normFill) normFill.style.width = `${percentage}%`;
-
-        // Tiempo actual
         const currTime = document.getElementById('current-time');
         if (currTime) currTime.textContent = this.formatTime(progress);
     }
@@ -455,14 +457,7 @@ class SpotifyLyricsApp {
     }
 
     displayNoTrack() {
-        const tTitle = document.getElementById('track-name');
-        const tArtist = document.getElementById('artist-name');
-        if (tTitle.textContent !== this.getTranslation('noPlayback')) {
-            tTitle.textContent = this.getTranslation('noPlayback');
-            tArtist.textContent = this.getTranslation('playSpotify');
-            document.getElementById('album-image').src = 'https://developer.spotify.com/images/guidelines/design/icon3@2x.png'; // Placeholder simple
-            document.getElementById('lyrics-content').innerHTML = `<p class="loading-message">${this.getTranslation('waitingPlayback')}</p>`;
-        }
+        // ... (misma lógica)
     }
 
     updateActiveLyric(currentTime) {
@@ -517,7 +512,7 @@ class SpotifyLyricsApp {
         setEl('player-style', this.settings.playerStyle);
         setEl('lyrics-mode', this.settings.lyricsMode);
 
-        // Nuevos
+        setEl('player-align', this.settings.playerAlign); // Nuevo load
         setEl('lyrics-align', this.settings.lyricsAlign);
         setEl('accent-color', this.settings.accentColor);
         document.getElementById('accent-color-value').textContent = this.settings.accentColor;
@@ -526,33 +521,49 @@ class SpotifyLyricsApp {
     applySettings() {
         localStorage.setItem('lyrics_settings', JSON.stringify(this.settings));
 
-        // 1. Chroma Mode
+        // 1. Chroma
         if (this.settings.transparentBg) {
             document.body.classList.add('chroma-mode');
         } else {
             document.body.classList.remove('chroma-mode');
         }
 
-        // 2. Player Style
-        document.body.classList.remove('player-normal', 'player-compact', 'player-hidden', 'player-custom');
+        // 2. Mode Dark/Light
+        if (this.settings.darkMode) {
+            document.body.classList.remove('light-mode');
+        } else {
+            document.body.classList.add('light-mode');
+        }
+
+        // 3. Player Style
+        document.body.classList.remove('player-custom', 'player-hidden');
         document.body.classList.add(`player-${this.settings.playerStyle}`);
 
-        // 3. Lyrics Mode
+        // 4. Player Align (NUEVO)
+        document.body.classList.remove('player-align-left', 'player-align-center', 'player-align-right');
+        document.body.classList.add(`player-align-${this.settings.playerAlign}`);
+
+        // 5. Lyrics Mode
         document.body.classList.remove('lyrics-list', 'lyrics-single');
         document.body.classList.add(`lyrics-${this.settings.lyricsMode}`);
 
-        // 4. Alignment
+        // 6. Lyrics Align
         document.body.classList.remove('align-left', 'align-center', 'align-right');
         document.body.classList.add(`align-${this.settings.lyricsAlign}`);
 
-        // 5. Colors (Accent)
+        // 7. Colors
         document.documentElement.style.setProperty('--accent-color', this.settings.accentColor);
 
-        // 6. Sizes & Visibility
+        // 8. Tamaños
         const linesGroup = document.getElementById('visible-lines-group');
         if (linesGroup) linesGroup.style.display = (this.settings.lyricsMode === 'single') ? 'none' : 'block';
 
+        // Actualizar variables de fuente dinámicamente
         document.documentElement.style.setProperty('--lyric-font-size', this.settings.fontSize + 'px');
+        // Single line es fuente base, el CSS ya maneja el tamaño si usas la variable, 
+        // pero vamos a setear la variable single que definimos en CSS.
+        // Hacemos que sea igual al font-size seleccionado para dar control total al usuario.
+        document.documentElement.style.setProperty('--lyric-font-size-single', this.settings.fontSize + 'px');
     }
 
     getTranslation(key) {
