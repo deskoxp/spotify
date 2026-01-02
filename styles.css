@@ -9,15 +9,54 @@
     --accent-purple: #8B5CF6;
     --accent-blue: #3B82F6;
     --accent-pink: #EC4899;
-    
+
     --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     --gradient-spotify: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
-    
+
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
     --shadow-glow: 0 0 20px rgba(29, 185, 84, 0.3);
+    --shadow-text: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+/* Variables para Modo Claro */
+body.light-mode {
+    --spotify-dark: #f0f2f5;
+    --text-white: #191414;
+    --text-gray: #5e5e5e;
+    --shadow-text: none;
+    background: #f0f2f5;
+}
+
+body.light-mode .lyric-line.active {
+    color: #000000;
+    text-shadow: 0 0 20px rgba(29, 185, 84, 0.2);
+    background: rgba(29, 185, 84, 0.1);
+}
+
+body.light-mode .login-container,
+body.light-mode .song-info,
+body.light-mode .feature,
+body.light-mode .settings-panel,
+body.light-mode .controls {
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+body.light-mode #lyrics-screen {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Transiciones suaves */
+.fade-transition {
+    transition: opacity 0.5s ease-in-out;
+}
+
+.fade-out {
+    opacity: 0;
 }
 
 * {
@@ -32,6 +71,17 @@ body {
     color: var(--text-white);
     overflow: hidden;
     min-height: 100vh;
+}
+
+/* Modo compacto para OBS */
+body.compact-mode {
+    background: transparent;
+}
+
+body.compact-mode #lyrics-screen {
+    background: transparent;
+    padding: 0;
+    justify-content: center;
 }
 
 body.transparent {
@@ -71,8 +121,17 @@ body.transparent {
 }
 
 @keyframes pulse {
-    0%, 100% { transform: scale(1) translate(-25%, -25%); opacity: 0.5; }
-    50% { transform: scale(1.1) translate(-25%, -25%); opacity: 0.8; }
+
+    0%,
+    100% {
+        transform: scale(1) translate(-25%, -25%);
+        opacity: 0.5;
+    }
+
+    50% {
+        transform: scale(1.1) translate(-25%, -25%);
+        opacity: 0.8;
+    }
 }
 
 .login-container {
@@ -102,8 +161,15 @@ body.transparent {
 }
 
 @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .login-container h1 {
@@ -281,14 +347,32 @@ body.transparent {
     animation: wave 1.2s ease-in-out infinite;
 }
 
-.playing-animation span:nth-child(1) { animation-delay: 0s; }
-.playing-animation span:nth-child(2) { animation-delay: 0.2s; }
-.playing-animation span:nth-child(3) { animation-delay: 0.4s; }
-.playing-animation span:nth-child(4) { animation-delay: 0.6s; }
+.playing-animation span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.playing-animation span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.playing-animation span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.playing-animation span:nth-child(4) {
+    animation-delay: 0.6s;
+}
 
 @keyframes wave {
-    0%, 100% { height: 6px; }
-    50% { height: 16px; }
+
+    0%,
+    100% {
+        height: 6px;
+    }
+
+    50% {
+        height: 16px;
+    }
 }
 
 .track-details {
@@ -378,16 +462,19 @@ body.transparent {
     transition: all 0.3s ease;
     border-radius: 12px;
     opacity: 0.5;
+    text-shadow: var(--shadow-text);
 }
 
 .lyric-line.active {
     color: var(--text-white);
-    font-weight: 600;
+    font-weight: 700;
     font-size: 32px;
     opacity: 1;
-    background: rgba(29, 185, 84, 0.1);
+    background: rgba(29, 185, 84, 0.15);
     transform: translateX(10px);
-    text-shadow: 0 2px 10px rgba(29, 185, 84, 0.3);
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.9),
+        0 0 40px rgba(29, 185, 84, 0.4),
+        0 2px 4px rgba(0, 0, 0, 1);
 }
 
 .lyric-line.past {
@@ -396,6 +483,91 @@ body.transparent {
 
 .lyric-line.upcoming {
     opacity: 0.6;
+}
+
+/* Modo compacto - SOLO línea actual visible */
+body.compact-mode .lyric-line.past,
+body.compact-mode .lyric-line.upcoming {
+    display: none;
+}
+
+body.compact-mode .lyric-line {
+    font-size: 36px;
+    padding: 1.5rem 2rem;
+    margin: 0;
+    text-align: center;
+}
+
+body.compact-mode .lyric-line.active {
+    font-size: 48px;
+    font-weight: 800;
+    background: rgba(29, 185, 84, 0.25);
+    border-left: 5px solid var(--spotify-green);
+    padding-left: 2.5rem;
+}
+
+body.compact-mode .lyrics-container {
+    max-width: 800px;
+    padding: 1rem;
+    align-items: center;
+}
+
+/* Reproductor compacto horizontal */
+body.compact-mode .song-info {
+    display: flex !important;
+    max-width: 600px;
+    margin: 0 auto 1.5rem auto;
+    padding: 0.75rem 1rem;
+    gap: 1rem;
+    align-items: center;
+}
+
+body.compact-mode .album-art {
+    width: 60px;
+    height: 60px;
+}
+
+body.compact-mode .album-art img {
+    border-radius: 8px;
+}
+
+body.compact-mode #track-name {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+body.compact-mode #artist-name {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+body.compact-mode .progress-bar {
+    height: 4px;
+}
+
+body.compact-mode .playing-animation {
+    height: 14px;
+    padding: 2px 4px;
+    bottom: 4px;
+    right: 4px;
+}
+
+body.compact-mode .playing-animation span {
+    width: 2px;
+}
+
+body.compact-mode .controls {
+    display: none;
+}
+
+body.compact-mode .lyrics-wrapper {
+    margin-bottom: 0;
+    flex: 0;
+}
+
+body.compact-mode .lyrics-content {
+    padding: 0;
+    overflow: visible;
 }
 
 .loading-message {
@@ -517,25 +689,25 @@ body.transparent {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .album-art {
         width: 100px;
         height: 100px;
         margin: 0 auto;
     }
-    
+
     #track-name {
         font-size: 1.4rem;
     }
-    
+
     .lyric-line {
         font-size: 20px;
     }
-    
+
     .lyric-line.active {
         font-size: 24px;
     }
-    
+
     .settings-panel {
         min-width: 90%;
     }

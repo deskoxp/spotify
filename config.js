@@ -9,7 +9,7 @@
 const CONFIG = {
     // ⚠️ REEMPLAZA ESTO con tu Client ID de Spotify
     // Ejemplo: CLIENT_ID: 'abc123def456ghi789jkl012mno345pqr',
-    CLIENT_ID: 'c8b621295efc487d86381b96752014d6',
+    CLIENT_ID: 'TU_CLIENT_ID_AQUI',
 
     // URL de redirección - DEBE coincidir EXACTAMENTE con la configurada en Spotify Dashboard
     // Si usas servidor local (http://localhost:8000): Agrega 'http://localhost:8000/index.html'
@@ -61,4 +61,3 @@ const DISPLAY_CONFIG = {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { CONFIG, LYRICS_API, DISPLAY_CONFIG };
 }
-

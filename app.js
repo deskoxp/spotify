@@ -11,13 +11,16 @@ class SpotifyLyricsApp {
         this.syncedLyrics = [];
         this.updateInterval = null;
         this.lastUpdateTime = 0;
+        this.isTransitioning = false;
 
         // Configuración
         this.settings = {
             transparentBg: true,
             showSongInfo: true,
             fontSize: 28,
-            visibleLines: 7
+            visibleLines: 7,
+            darkMode: true,
+            language: 'es'
         };
 
         this.init();
@@ -25,8 +28,22 @@ class SpotifyLyricsApp {
 
     init() {
         this.loadSettings();
+        this.checkCompactMode();
         this.setupEventListeners();
         this.checkAuth();
+        this.updateInterfaceLanguage(); // Aplicar idioma inicial
+    }
+
+    checkCompactMode() {
+        // Verificar si se activó el modo compacto desde la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const isCompact = urlParams.get('compact') === 'true';
+
+        if (isCompact) {
+            document.body.classList.add('compact-mode');
+            this.settings.showSongInfo = false;
+            this.settings.transparentBg = true;
+        }
     }
 
     // ===== PKCE HELPERS =====
@@ -89,7 +106,26 @@ class SpotifyLyricsApp {
             this.applySettings();
         });
 
-        // Toggle mode
+        // Theme Toggle
+        const darkModeToggle = document.getElementById('dark-mode');
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', (e) => {
+                this.settings.darkMode = e.target.checked;
+                this.applySettings();
+            });
+        }
+
+        // Language Select
+        const languageSelect = document.getElementById('language-select');
+        if (languageSelect) {
+            languageSelect.addEventListener('change', (e) => {
+                this.settings.language = e.target.value;
+                this.applySettings();
+                this.updateInterfaceLanguage(); // Actualizar textos al cambiar idioma
+            });
+        }
+
+        // Toggle mode button (quick toggle)
         document.getElementById('toggle-mode').addEventListener('click', () => {
             this.settings.showSongInfo = !this.settings.showSongInfo;
             document.getElementById('show-song-info').checked = this.settings.showSongInfo;
@@ -228,7 +264,7 @@ class SpotifyLyricsApp {
             });
 
             if (response.status === 401) {
-                // Token expirado
+                // Token expirado - Intentar refresh si tuviéramos lógica, por ahora logout
                 this.logout();
                 return null;
             }
@@ -346,6 +382,8 @@ class SpotifyLyricsApp {
 
     // ===== UI UPDATES =====
     async updateNowPlaying() {
+        if (this.isTransitioning) return; // No actualizar durante transición
+
         const track = await this.getCurrentTrack();
 
         if (!track) {
@@ -356,17 +394,48 @@ class SpotifyLyricsApp {
         // Actualizar progreso
         this.updateProgress(track.progress, track.duration);
 
-        // Si es una nueva canción, actualizar todo
+        // Si es una nueva canción, hacer transición
         if (!this.currentTrack || this.currentTrack.id !== track.id) {
-            this.currentTrack = track;
-            await this.updateTrackInfo(track);
-            await this.loadAndDisplayLyrics(track);
+            await this.handleTrackChange(track);
         } else {
             // Solo actualizar la línea actual de las letras
             if (this.syncedLyrics.length > 0) {
                 this.updateActiveLyric(track.progress);
             }
         }
+    }
+
+    async handleTrackChange(track) {
+        this.isTransitioning = true;
+
+        // 1. Fade Out
+        const lyricsContainer = document.getElementById('lyrics-content');
+        const songInfo = document.querySelector('.song-info');
+        lyricsContainer.classList.add('fade-transition', 'fade-out');
+        songInfo.classList.add('fade-transition', 'fade-out');
+
+        // Esperar a que termine la animación
+        await new Promise(r => setTimeout(r, 500));
+
+        // 2. Limpiar y Cargar nuevos datos
+        this.currentTrack = track;
+        this.updateTrackInfo(track);
+        lyricsContainer.innerHTML = ''; // Limpiar letras inmediatamente
+
+        // Mostrar "Cargando..."
+        const loadingMsg = document.createElement('p');
+        loadingMsg.className = 'loading-message';
+        loadingMsg.textContent = this.getTranslation('loadingLyrics');
+        lyricsContainer.appendChild(loadingMsg);
+
+        // 3. Fade In (con loading)
+        lyricsContainer.classList.remove('fade-out');
+        songInfo.classList.remove('fade-out');
+
+        // 4. Buscar letras en background
+        await this.loadAndDisplayLyrics(track);
+
+        this.isTransitioning = false;
     }
 
     updateTrackInfo(track) {
@@ -382,24 +451,30 @@ class SpotifyLyricsApp {
 
     async loadAndDisplayLyrics(track) {
         const lyricsContainer = document.getElementById('lyrics-content');
-        lyricsContainer.innerHTML = '<p class="loading-message">Buscando letras...</p>';
 
         const lyrics = await this.fetchLyrics(track.name, track.artist, track.duration);
 
+        // Fade out loading message
+        lyricsContainer.classList.add('fade-out');
+        await new Promise(r => setTimeout(r, 300));
+
+        lyricsContainer.innerHTML = ''; // Limpiar loading
+
         if (!lyrics) {
             this.displayNoLyrics();
-            return;
-        }
-
-        this.currentLyrics = lyrics;
-
-        if (lyrics.synced) {
-            this.syncedLyrics = this.parseSyncedLyrics(lyrics.lyrics);
-            this.displaySyncedLyrics();
         } else {
-            this.syncedLyrics = [];
-            this.displayPlainLyrics(lyrics.plain);
+            this.currentLyrics = lyrics;
+            if (lyrics.synced) {
+                this.syncedLyrics = this.parseSyncedLyrics(lyrics.lyrics);
+                this.displaySyncedLyrics();
+            } else {
+                this.syncedLyrics = [];
+                this.displayPlainLyrics(lyrics.plain);
+            }
         }
+
+        // Fade in new lyrics
+        lyricsContainer.classList.remove('fade-out');
     }
 
     displaySyncedLyrics() {
@@ -435,19 +510,24 @@ class SpotifyLyricsApp {
         const lyricsContainer = document.getElementById('lyrics-content');
         lyricsContainer.innerHTML = `
             <div class="no-lyrics">
-                <h3>😔 Letras no disponibles</h3>
-                <p>No se encontraron letras para esta canción.</p>
+                <h3>${this.getTranslation('noLyricsTitle')}</h3>
+                <p>${this.getTranslation('noLyricsText')}</p>
             </div>
         `;
     }
 
     displayNoTrack() {
-        document.getElementById('track-name').textContent = 'No hay reproducción';
-        document.getElementById('artist-name').textContent = 'Reproduce algo en Spotify';
-        document.getElementById('album-image').src = '';
+        const tTitle = document.getElementById('track-name');
+        const tArtist = document.getElementById('artist-name');
 
-        const lyricsContainer = document.getElementById('lyrics-content');
-        lyricsContainer.innerHTML = '<p class="loading-message">Esperando reproducción...</p>';
+        if (tTitle.textContent !== this.getTranslation('noPlayback')) {
+            tTitle.textContent = this.getTranslation('noPlayback');
+            tArtist.textContent = this.getTranslation('playSpotify');
+            document.getElementById('album-image').src = '';
+
+            const lyricsContainer = document.getElementById('lyrics-content');
+            lyricsContainer.innerHTML = `<p class="loading-message">${this.getTranslation('waitingPlayback')}</p>`;
+        }
     }
 
     updateActiveLyric(currentTime) {
@@ -497,20 +577,39 @@ class SpotifyLyricsApp {
         }
     }
 
-    // ===== SETTINGS =====
+    // ===== SETTINGS & LANGUAGE =====
     loadSettings() {
         const saved = localStorage.getItem('lyrics_settings');
         if (saved) {
             this.settings = { ...this.settings, ...JSON.parse(saved) };
         }
 
-        // Aplicar a los controles
-        document.getElementById('transparent-bg').checked = this.settings.transparentBg;
-        document.getElementById('show-song-info').checked = this.settings.showSongInfo;
-        document.getElementById('font-size').value = this.settings.fontSize;
-        document.getElementById('font-size-value').textContent = this.settings.fontSize + 'px';
-        document.getElementById('visible-lines').value = this.settings.visibleLines;
-        document.getElementById('visible-lines-value').textContent = this.settings.visibleLines;
+        // Aplicar a los controles si existen en el DOM
+        const setCheckbox = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.checked = val;
+        };
+        const setValue = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        };
+        const setText = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+        };
+
+        setCheckbox('transparent-bg', this.settings.transparentBg);
+        setCheckbox('show-song-info', this.settings.showSongInfo);
+        setCheckbox('dark-mode', this.settings.darkMode);
+
+        setValue('font-size', this.settings.fontSize);
+        setText('font-size-value', this.settings.fontSize + 'px');
+
+        setValue('visible-lines', this.settings.visibleLines);
+        setText('visible-lines-value', this.settings.visibleLines);
+
+        const langSelect = document.getElementById('language-select');
+        if (langSelect) langSelect.value = this.settings.language;
     }
 
     applySettings() {
@@ -520,18 +619,29 @@ class SpotifyLyricsApp {
         // Aplicar fondo transparente
         if (this.settings.transparentBg) {
             document.body.classList.add('transparent');
-            document.getElementById('lyrics-screen').classList.add('transparent');
+            const ls = document.getElementById('lyrics-screen');
+            if (ls) ls.classList.add('transparent');
         } else {
             document.body.classList.remove('transparent');
-            document.getElementById('lyrics-screen').classList.remove('transparent');
+            const ls = document.getElementById('lyrics-screen');
+            if (ls) ls.classList.remove('transparent');
+        }
+
+        // Modo Claro/Oscuro
+        if (this.settings.darkMode) {
+            document.body.classList.remove('light-mode');
+        } else {
+            document.body.classList.add('light-mode');
         }
 
         // Mostrar/ocultar info de canción
         const songInfo = document.querySelector('.song-info');
-        if (this.settings.showSongInfo) {
-            songInfo.classList.remove('hidden');
-        } else {
-            songInfo.classList.add('hidden');
+        if (songInfo) {
+            if (this.settings.showSongInfo) {
+                songInfo.classList.remove('hidden');
+            } else {
+                songInfo.classList.add('hidden');
+            }
         }
 
         // Tamaño de fuente
@@ -549,9 +659,39 @@ class SpotifyLyricsApp {
         });
     }
 
+    // Sistema de Traducción
+    getTranslation(key) {
+        const lang = this.settings.language || 'es';
+
+        // Verificar si translations existe globalmente
+        if (typeof translations !== 'undefined' && translations[lang] && translations[lang][key]) {
+            return translations[lang][key];
+        }
+
+        // Fallback a inglés o devolver clave
+        if (typeof translations !== 'undefined' && translations['en'] && translations['en'][key]) {
+            return translations['en'][key];
+        }
+
+        return key;
+    }
+
+    updateInterfaceLanguage() {
+        const elements = document.querySelectorAll('[data-i18n]');
+        elements.forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (key) {
+                el.textContent = this.getTranslation(key);
+            }
+        });
+
+        // Actualizar placeholders o títulos si es necesario
+        // (Aquí podrías agregar lógica para inputs o titles)
+    }
+
     toggleSettings() {
         const panel = document.getElementById('settings-panel');
-        panel.classList.toggle('active');
+        if (panel) panel.classList.toggle('active');
     }
 
     // ===== UPDATE LOOP =====
