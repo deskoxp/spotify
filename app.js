@@ -4,6 +4,8 @@
 class SpotifyLyricsApp {
     constructor() {
         this.accessToken = null;
+        this.refreshToken = null;
+        this.tokenExpiry = null;
         this.currentTrack = null;
         this.currentLyrics = null;
         this.syncedLyrics = [];
@@ -25,6 +27,31 @@ class SpotifyLyricsApp {
         this.loadSettings();
         this.setupEventListeners();
         this.checkAuth();
+    }
+
+    // ===== PKCE HELPERS =====
+    generateRandomString(length) {
+        const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const values = crypto.getRandomValues(new Uint8Array(length));
+        return values.reduce((acc, x) => acc + possible[x % possible.length], "");
+    }
+
+    async sha256(plain) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(plain);
+        return window.crypto.subtle.digest('SHA-256', data);
+    }
+
+    base64encode(input) {
+        return btoa(String.fromCharCode(...new Uint8Array(input)))
+            .replace(/=/g, '')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_');
+    }
+
+    async generateCodeChallenge(codeVerifier) {
+        const hashed = await this.sha256(codeVerifier);
+        return this.base64encode(hashed);
     }
 
     // ===== AUTENTICACIÓN =====
@@ -70,15 +97,14 @@ class SpotifyLyricsApp {
         });
     }
 
-    checkAuth() {
-        // Verificar si hay un token en la URL (después de redirect)
-        const hash = window.location.hash.substring(1);
-        const params = new URLSearchParams(hash);
-        const token = params.get('access_token');
+    async checkAuth() {
+        // Verificar si hay un código en la URL (después de redirect con PKCE)
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
 
-        if (token) {
-            this.accessToken = token;
-            localStorage.setItem('spotify_access_token', token);
+        if (code) {
+            // Intercambiar el código por un token
+            await this.exchangeCodeForToken(code);
 
             // Limpiar URL
             window.history.replaceState({}, document.title, window.location.pathname);
@@ -88,22 +114,95 @@ class SpotifyLyricsApp {
         } else {
             // Verificar si hay un token guardado
             const savedToken = localStorage.getItem('spotify_access_token');
-            if (savedToken) {
+            const tokenExpiry = localStorage.getItem('spotify_token_expiry');
+
+            if (savedToken && tokenExpiry && Date.now() < parseInt(tokenExpiry)) {
                 this.accessToken = savedToken;
+                this.tokenExpiry = parseInt(tokenExpiry);
                 this.showLyricsScreen();
                 this.startUpdating();
             }
         }
     }
 
-    login() {
-        const authUrl = `${CONFIG.AUTH_ENDPOINT}?client_id=${CONFIG.CLIENT_ID}&redirect_uri=${encodeURIComponent(CONFIG.REDIRECT_URI)}&scope=${encodeURIComponent(CONFIG.SCOPES)}&response_type=token&show_dialog=true`;
+    async login() {
+        // Generar code verifier y challenge para PKCE
+        const codeVerifier = this.generateRandomString(64);
+        const codeChallenge = await this.generateCodeChallenge(codeVerifier);
+
+        // Guardar code verifier para usarlo después
+        localStorage.setItem('code_verifier', codeVerifier);
+
+        // Construir URL de autorización con PKCE
+        const params = new URLSearchParams({
+            client_id: CONFIG.CLIENT_ID,
+            response_type: 'code',
+            redirect_uri: CONFIG.REDIRECT_URI,
+            scope: CONFIG.SCOPES,
+            code_challenge_method: 'S256',
+            code_challenge: codeChallenge,
+            show_dialog: 'true'
+        });
+
+        const authUrl = `${CONFIG.AUTH_ENDPOINT}?${params.toString()}`;
         window.location.href = authUrl;
+    }
+
+    async exchangeCodeForToken(code) {
+        const codeVerifier = localStorage.getItem('code_verifier');
+
+        if (!codeVerifier) {
+            console.error('Code verifier not found');
+            return;
+        }
+
+        const params = new URLSearchParams({
+            client_id: CONFIG.CLIENT_ID,
+            grant_type: 'authorization_code',
+            code: code,
+            redirect_uri: CONFIG.REDIRECT_URI,
+            code_verifier: codeVerifier
+        });
+
+        try {
+            const response = await fetch(CONFIG.TOKEN_ENDPOINT, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params.toString()
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to exchange code for token');
+            }
+
+            const data = await response.json();
+
+            this.accessToken = data.access_token;
+            this.refreshToken = data.refresh_token;
+            this.tokenExpiry = Date.now() + (data.expires_in * 1000);
+
+            // Guardar tokens
+            localStorage.setItem('spotify_access_token', this.accessToken);
+            localStorage.setItem('spotify_refresh_token', this.refreshToken);
+            localStorage.setItem('spotify_token_expiry', this.tokenExpiry.toString());
+
+            // Limpiar code verifier
+            localStorage.removeItem('code_verifier');
+        } catch (error) {
+            console.error('Error exchanging code for token:', error);
+        }
     }
 
     logout() {
         this.accessToken = null;
+        this.refreshToken = null;
+        this.tokenExpiry = null;
         localStorage.removeItem('spotify_access_token');
+        localStorage.removeItem('spotify_refresh_token');
+        localStorage.removeItem('spotify_token_expiry');
+        localStorage.removeItem('code_verifier');
         this.stopUpdating();
         this.showLoginScreen();
     }
