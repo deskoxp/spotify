@@ -1,0 +1,482 @@
+:root {
+    --spotify-green: #1DB954;
+    --spotify-black: #191414;
+    --spotify-dark: #121212;
+    --spotify-gray: #282828;
+    --spotify-light-gray: #B3B3B3;
+    --text-white: #FFFFFF;
+    --text-gray: #A0A0A0;
+    --chroma-key: #00b140;
+    /* Verde puro para Chroma Key */
+
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --gradient-spotify: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 20px rgba(29, 185, 84, 0.3);
+    --shadow-text: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+/* Variables para Modo Claro */
+body.light-mode {
+    --spotify-dark: #f0f2f5;
+    --text-white: #191414;
+    --text-gray: #5e5e5e;
+    --shadow-text: none;
+    background: #f0f2f5;
+}
+
+/* Overrides para modo claro */
+body.light-mode .lyric-line.active {
+    color: #000000;
+    text-shadow: 0 0 20px rgba(29, 185, 84, 0.2);
+    background: rgba(29, 185, 84, 0.1);
+}
+
+body.light-mode .song-info,
+body.light-mode .settings-panel,
+body.light-mode .controls button {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #000;
+}
+
+body.light-mode .lyric-line {
+    color: #888;
+}
+
+/* Fondo Chroma Key */
+body.chroma-mode {
+    background-color: var(--chroma-key) !important;
+    background-image: none !important;
+}
+
+body.chroma-mode #lyrics-screen {
+    background: transparent !important;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--spotify-dark);
+    color: var(--text-white);
+    overflow: hidden;
+    min-height: 100vh;
+}
+
+/* Screens */
+.screens-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+}
+
+.screen {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.screen.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ===== LOGIN SCREEN ===== */
+#login-screen {
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-container {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 500px;
+    padding: 3rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.spotify-icon {
+    width: 80px;
+    height: 80px;
+    color: var(--spotify-green);
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(var(--shadow-glow));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.login-container h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, #fff 0%, var(--spotify-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--text-gray);
+    font-size: 1.1rem;
+    font-weight: 300;
+}
+
+.features {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.feature {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.spotify-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+    background: var(--gradient-spotify);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+    margin: 1.5rem 0;
+}
+
+.spotify-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg), var(--shadow-glow);
+}
+
+.spotify-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* ===== LYRICS SCREEN ===== */
+#lyrics-screen {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    flex-direction: column;
+    padding: 2rem;
+}
+
+.lyrics-container {
+    width: 100%;
+    max-width: 1200px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Centrar todo por defecto */
+}
+
+/* Song Info General */
+.song-info {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 800px;
+}
+
+/* Modo Player: Hidden */
+body.player-hidden .song-info {
+    display: none !important;
+}
+
+/* Modo Player: Compact */
+body.player-compact .song-info {
+    padding: 0.75rem 1.5rem;
+    margin-bottom: 1rem;
+    align-items: center;
+    max-width: 600px;
+}
+
+.album-art {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+}
+
+body.player-compact .album-art {
+    width: 60px;
+    height: 60px;
+}
+
+.album-art img {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: var(--shadow-md);
+}
+
+.track-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    text-align: left;
+}
+
+#track-name {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.player-compact #track-name {
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+}
+
+#artist-name {
+    color: var(--text-gray);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+body.player-compact #artist-name {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+body.player-compact .progress-bar {
+    height: 4px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--gradient-spotify);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 10px rgba(29, 185, 84, 0.5);
+}
+
+/* Lyrics Wrapper */
+.lyrics-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 1rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.lyrics-content {
+    height: 100%;
+    overflow-y: auto;
+    padding: 2rem;
+    scroll-behavior: smooth;
+    width: 100%;
+    text-align: center;
+}
+
+/* Estilos Modo: Línea Única (Single) */
+body.lyrics-single .lyrics-content {
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0;
+}
+
+body.lyrics-single .lyric-line {
+    display: none;
+    /* Ocultar todo por defecto */
+}
+
+body.lyrics-single .lyric-line.active {
+    display: block;
+    /* Solo mostrar activa */
+    font-size: 48px !important;
+    /* Forzar tamaño grande */
+    font-weight: 800;
+    opacity: 1;
+    transform: scale(1.05);
+    margin: 0;
+    padding: 1rem;
+}
+
+/* Estilos Modo: Lista (List) */
+.lyric-line {
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1.5;
+    padding: 0.75rem 1.5rem;
+    margin: 0.5rem 0;
+    color: var(--text-gray);
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    opacity: 0.5;
+    text-shadow: var(--shadow-text);
+}
+
+.lyric-line.active {
+    color: var(--text-white);
+    font-weight: 700;
+    font-size: 32px;
+    opacity: 1;
+    background: rgba(29, 185, 84, 0.15);
+    transform: translateX(0);
+    /* Centrado */
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.9), 0 0 40px rgba(29, 185, 84, 0.4);
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: auto;
+    z-index: 100;
+}
+
+.control-btn {
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-white);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background: rgba(29, 185, 84, 0.2);
+}
+
+/* Settings Panel */
+.settings-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(18, 18, 18, 0.98);
+    backdrop-filter: blur(20px);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-lg);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    min-width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.settings-panel.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.setting-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-white);
+}
+
+.language-select {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+}
+
+.language-select option {
+    background: #121212;
+}
+
+/* Transiciones */
+.fade-transition {
+    transition: opacity 0.5s ease-in-out;
+}
+
+.fade-out {
+    opacity: 0;
+}
