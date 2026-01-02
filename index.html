@@ -104,31 +104,15 @@
             <!-- Contenedor de letras -->
             <div class="lyrics-wrapper">
                 <div id="lyrics-content" class="lyrics-content">
-                    <p class="loading-message" data-i18n="loadingLyrics">Cargando letras...</p>
+                    <!-- Vacío por defecto para que no estorbe -->
                 </div>
             </div>
 
-            <!-- Controles Flotantes -->
+            <!-- Controles Flotantes con Texto -->
             <div class="controls">
-                <button id="toggle-bg" class="control-btn" title="Alternar Fondo Verde">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                    </svg>
-                </button>
-                <button id="settings-btn" class="control-btn" title="Configuración">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3" />
-                        <path
-                            d="M12 1v6m0 6v6m8.66-15.66l-4.24 4.24m-4.24 4.24l-4.24 4.24M23 12h-6m-6 0H1m20.66 8.66l-4.24-4.24m-4.24-4.24l-4.24-4.24" />
-                    </svg>
-                </button>
-                <button id="logout-btn" class="control-btn" title="Cerrar sesión">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                        <polyline points="16 17 21 12 16 7" />
-                        <line x1="21" y1="12" x2="9" y2="12" />
-                    </svg>
-                </button>
+                <button id="toggle-bg" class="control-btn text-btn" data-i18n="btnToggleBg">Fondo Verde</button>
+                <button id="settings-btn" class="control-btn text-btn" data-i18n="btnSettings">Ajustes</button>
+                <button id="logout-btn" class="control-btn text-btn" data-i18n="btnLogout">Salir</button>
             </div>
         </div>
 

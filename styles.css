@@ -6,7 +6,6 @@
     --text-gray: #A0A0A0;
     --chroma-key: #00b140;
     --accent-color: #e91429;
-    /* Nuevo color personalizable */
 
     --shadow-text: 0 2px 10px rgba(0, 0, 0, 0.8);
     --shadow-glow: 0 0 40px rgba(255, 255, 255, 0.2);
@@ -32,7 +31,7 @@ body.chroma-mode {
     background-image: none !important;
 }
 
-/* ===== SCREENS ===== */
+/* Screens */
 .screen {
     display: none;
     width: 100vw;
@@ -51,6 +50,7 @@ body.chroma-mode {
 /* ===== LOGIN SCREEN ===== */
 #login-screen {
     background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    z-index: 10000;
 }
 
 .login-container {
@@ -74,7 +74,6 @@ body.chroma-mode {
     font-weight: 600;
     color: white;
     background: var(--accent-color);
-    /* Usar accent color */
     border: none;
     border-radius: 50px;
     cursor: pointer;
@@ -94,7 +93,7 @@ body.chroma-mode {
     color: var(--spotify-green);
 }
 
-/* ===== LYRICS SCREEN (NUEVO LAYOUT) ===== */
+/* ===== LYRICS SCREEN ===== */
 #lyrics-screen {
     background: transparent;
     flex-direction: column;
@@ -108,19 +107,17 @@ body.chroma-mode {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Alineación vertical */
 }
 
-/* Contenedor Principal del Reproductor (Estilo Custom Sleep Token) */
+/* PLAYER LAYOUT (SIMÉTRICO) */
 .song-player-container {
     display: flex;
-    align-items: flex-end;
-    /* Alinear abajo */
+    align-items: flex-start;
+    /* Alineación superior inicial */
     gap: 1.5rem;
     margin-bottom: 2rem;
     position: relative;
     padding-bottom: 15px;
-    /* Espacio para barra roja */
 }
 
 /* Bloque Izquierdo: Carátula */
@@ -153,26 +150,26 @@ body.chroma-mode {
     right: -20px;
     bottom: -20px;
     background: rgba(255, 255, 255, 0.15);
-    /* Glow blanco sutil */
     filter: blur(30px);
     border-radius: 50%;
     z-index: 1;
     opacity: 0.6;
 }
 
-/* Bloque Derecho: Info + Controles */
+/* Bloque Derecho: Info + Controles (Misma Altura que Carátula) */
 .player-right {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    justify-content: space-between;
+    /* Clave: Info arriba, Controles abajo */
+    height: 180px;
+    /* Clave: Misma altura que la imagen */
     min-width: 350px;
 }
 
-/* Cajas Negras Redondeadas */
 .info-box,
 .controls-box {
     background: #101010;
-    /* Negro profundo casi puro */
     border-radius: 12px;
     padding: 1rem 1.5rem;
     width: 100%;
@@ -182,7 +179,11 @@ body.chroma-mode {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    height: 80px;
+    /* height flexible */
+    flex-grow: 1;
+    margin-bottom: 10px;
+    /* Separación pequeña */
+    max-height: 100px;
 }
 
 #track-name {
@@ -207,12 +208,14 @@ body.chroma-mode {
     align-items: center;
     justify-content: space-between;
     height: 60px;
+    /* Altura fija para la barra inferior */
     font-family: 'Poppins', monospace;
     font-weight: 700;
     font-size: 1.1rem;
+    flex-shrink: 0;
 }
 
-/* Waveform Animada */
+/* Waveform */
 .waveform {
     display: flex;
     align-items: center;
@@ -227,12 +230,10 @@ body.chroma-mode {
     display: block;
     width: 4px;
     background: var(--accent-color);
-    /* Rojo */
     border-radius: 2px;
     animation: wave 1s ease-in-out infinite;
 }
 
-/* Generar distintas alturas para simular onda */
 .waveform span:nth-child(odd) {
     height: 60%;
     animation-duration: 0.8s;
@@ -270,14 +271,11 @@ body.chroma-mode {
     position: absolute;
     bottom: 0;
     left: 20px;
-    /* Alineado un poco adentro */
     right: 0;
-    /* Hasta el final */
     height: 8px;
     background: transparent;
     z-index: 0;
     border-radius: 4px;
-    /* Un poco redondeado */
 }
 
 .bottom-progress-fill {
@@ -286,29 +284,24 @@ body.chroma-mode {
     width: 0%;
     border-radius: 4px;
     box-shadow: 0 0 15px var(--accent-color);
-    /* Resplandor rojo */
     transition: width 1s linear;
-    /* Movimiento suave */
 }
 
-
-/** Estilos y alineación de letras **/
+/* LYRICS ALIGNMENT & STYLE */
 .lyrics-content {
     width: 100%;
-    text-align: center;
-    /* Default */
     margin-top: 1rem;
+    /* Default center */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* Alineaciones */
+/* Clases de alineación (aplicadas al body) */
 body.align-left .lyrics-content {
     text-align: left;
     align-items: flex-start;
-}
-
-body.align-center .lyrics-content {
-    text-align: center;
-    align-items: center;
 }
 
 body.align-right .lyrics-content {
@@ -316,11 +309,14 @@ body.align-right .lyrics-content {
     align-items: flex-end;
 }
 
-/* Modo Línea Única (Single) */
+body.align-center .lyrics-content {
+    text-align: center;
+    align-items: center;
+}
+
+/* Single Line Mode */
 body.lyrics-single .lyrics-content {
     overflow: visible;
-    display: flex;
-    flex-direction: column;
 }
 
 body.lyrics-single .lyric-line {
@@ -334,11 +330,10 @@ body.lyrics-single .lyric-line.active {
     padding: 0;
     margin: 0;
     text-shadow: 2px 2px 0px #000;
-    /* Borde duro para legibilidad */
     line-height: 1.1;
 }
 
-/* Modo Lista (List) */
+/* List Mode */
 .lyric-line {
     font-size: 28px;
     color: rgba(255, 255, 255, 0.4);
@@ -352,44 +347,59 @@ body.lyrics-single .lyric-line.active {
     font-weight: 700;
 }
 
-/* CONTROLS & SETTINGS */
+/* CONTROLS (Botones inferiores) */
 .controls {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 20px;
+    right: 20px;
     display: flex;
-    gap: 1rem;
-    opacity: 0.2;
-    /* Casi invisible hasta hover */
-    transition: opacity 0.3s;
-}
-
-.controls:hover {
-    opacity: 1;
+    gap: 10px;
+    z-index: 9999;
+    /* Z-Index alto para verlos siempre */
 }
 
 .control-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.6);
+    /* Fondo oscuro semitransparente */
     color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 8px;
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    backdrop-filter: blur(5px);
 }
 
-/* Settings Panel */
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* SETTINGS PANEL (Abajo a la derecha) */
 .settings-panel {
     background: #121212;
     border: 1px solid #333;
     padding: 2rem;
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    bottom: 80px;
+    /* Encima de los botones */
+    right: 20px;
+    /* Pegado a la derecha */
+    transform: none;
+    /* Quitar centrado */
+    top: auto;
+    left: auto;
     border-radius: 12px;
     display: none;
-    z-index: 100;
-    min-width: 350px;
+    z-index: 10000;
+    /* Super alto */
+    min-width: 300px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .settings-panel.active {
@@ -416,28 +426,11 @@ input[type="color"] {
     border-radius: 6px;
 }
 
-.color-picker-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-#accent-color {
-    height: 40px;
-    padding: 0;
-    border: none;
-    width: 60px;
-}
-
-/* ESTILOS LEGACY (Normal/Compact/Hidden) para compatibilidad */
-/* Ocultar el diseño custom si no está seleccionado */
+/* Estilos Legacy Hidden */
 body:not(.player-custom) .song-player-container {
     display: none !important;
 }
 
-/* Si está en modos legacy, ocultar elementos nuevos */
 body.player-custom .song-info {
     display: none;
 }
-
-/* Ocultar el viejo */

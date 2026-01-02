@@ -43,7 +43,12 @@ const translations = {
         visibleLines: "Líneas visibles:",
         darkMode: "Modo oscuro",
         language: "Idioma:",
-        closeButton: "Cerrar"
+        closeButton: "Cerrar",
+
+        // Botones Menu Inferior
+        btnToggleBg: "Fondo Verde",
+        btnSettings: "Ajustes",
+        btnLogout: "Salir"
     },
 
     en: {
@@ -89,7 +94,12 @@ const translations = {
         visibleLines: "Visible lines:",
         darkMode: "Dark mode",
         language: "Language:",
-        closeButton: "Close"
+        closeButton: "Close",
+
+        // Menu Buttons
+        btnToggleBg: "Green BG",
+        btnSettings: "Config",
+        btnLogout: "Exit"
     },
 
     pt: {
@@ -135,7 +145,12 @@ const translations = {
         visibleLines: "Linhas visíveis:",
         darkMode: "Modo escuro",
         language: "Idioma:",
-        closeButton: "Fechar"
+        closeButton: "Fechar",
+
+        // Menu Buttons
+        btnToggleBg: "Fundo Verde",
+        btnSettings: "Ajustes",
+        btnLogout: "Sair"
     }
 };
 
