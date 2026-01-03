@@ -389,11 +389,9 @@ body.lyrics-single .lyric-line.active {
     margin: 0;
 
     /* Borde duro para legibilidad en modo claro/oscuro */
-    text-shadow:
-        -1px -1px 0 var(--bg-color),
-        1px -1px 0 var(--bg-color),
-        -1px 1px 0 var(--bg-color),
-        1px 1px 0 var(--bg-color);
+    -webkit-text-stroke: 2px #000000;
+    text-shadow: 4px 4px 0 #000000;
+    paint-order: stroke fill;
 
     line-height: 1.1;
     color: var(--text-primary);
@@ -494,4 +492,5 @@ body:not(.player-custom) .song-player-container {
 /* Ocultar Solo Letras */
 body.player-hidden .song-player-container {
     display: none !important;
+
 }
